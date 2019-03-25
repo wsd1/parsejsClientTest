@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ParseTest</title>
+    <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+</head>
+
+<body>
+
+    <button onclick="write1()">写入</button>
+    <button onclick="query1()">读取1</button>
+    <button onclick="query2()">读取2</button>
+    <button onclick="query3()">读取3</button>
+    <script>
+
+Parse.initialize('peDapNoazCLWTBVQW6acxNgUI4ylTE2LqfrMnrHa');
+Parse.serverURL = 'http://localhost:1337/parse';
+
+function write1(){
+    var Post = Parse.Object.extend("Post");
+    var post = new Post();
+
+    post.set("body", "7帖子");
+    post.set("tags", ["3stTag", "2ndTag"]);
+    post.set("price", 200);
+
+    post.save().then(obj => {
+        console.log("Saved " + post.id);
+
+    var Comment = Parse.Object.extend("Comment");
+    var comment = new Comment();
+
+    comment.set("content", "Great post!!");
+    comment.set("parent", post);
+    comment.save();
+
+
+    },
+    (obj, err) => {
+        console.log(err);
+    });
+}
+
+
+function query1(){
+    var priceQuery = new Parse.Query("Post");
+
+    priceQuery.greaterThan("price", 100);
+
+    priceQuery.find().then(rets => {
+        console.log(rets);
+    })
+}
+
+
+function query2(){
+    var prices = [100, 120, 230];
+
+    var priceQuery = new Parse.Query("Post");
+
+    priceQuery.containedIn("price", prices);
+
+    priceQuery.find().then(rets => {
+        console.log(rets);
+    })
+}
+
+
+function query3(){
+
+    var priceQuery = new Parse.Query("Post");
+    priceQuery.greaterThan("price", 100);
+
+    var q = new Parse.Query("Comment");
+    q.matchesKeyInQuery("parent", "id", priceQuery);
+
+
+
+
+    q.find().then(rets => {
+        console.log(rets);
+    })
+}
+    </script>
+</body>
+
+</html>
