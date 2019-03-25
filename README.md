@@ -2,7 +2,9 @@
 ---
 本项目用于测试 parse 客户端访问服务器的细节。
 
+参考教程：
 
+https://www.youtube.com/watch?v=j0zDb9hVooQ&t=404s
 
 ## 内部实现
 
