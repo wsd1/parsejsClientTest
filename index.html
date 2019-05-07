@@ -1,89 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>ParseTest</title>
-    <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
-</head>
+    <!--script src="https://npmcdn.com/parse/dist/parse.js"></script-->
+    <script
+      type="text/javascript"
+      src="https://npmcdn.com/parse@2.1.0/dist/parse.min.js"
+    ></script>
+  </head>
 
-<body>
-
+  <body>
+    <h1>Open console to see output ~</h1>
+    <button onclick="simpleObject()">简单对象写入</button>
+    <button onclick="login()">AuthData登录</button>
+    <button onclick="current()">currentUser写入</button>
+    <button onclick="logout()">退出登录</button>
     <button onclick="write1()">写入</button>
     <button onclick="query1()">读取1</button>
     <button onclick="query2()">读取2</button>
     <button onclick="query3()">读取3</button>
     <script>
+      document.onload = function() {};
+      Parse.initialize("peDapNoazCLWTBVQW6acxNgUI4ylTE2LqfrMnrHa");
+      Parse.serverURL = "http://localhost:1337/parse";
+      //Parse.masterKey = 'fRw4mlRZGUdMCVB8BRv4yb4oyZW165BTKuVWnTQL';
 
-Parse.initialize('peDapNoazCLWTBVQW6acxNgUI4ylTE2LqfrMnrHa');
-Parse.serverURL = 'http://localhost:1337/parse';
+      function simpleObject() {
+        //server需要确定 allowClientClassCreation 不能设定为 false
+        const GameScore = Parse.Object.extend("GameScore");
+        const gameScore = new GameScore();
 
-function write1(){
-    var Post = Parse.Object.extend("Post");
-    var post = new Post();
+        gameScore.set("score", 1337);
+        gameScore.set("playerName", "Sean Plott");
+        gameScore.set("cheatMode", false);
 
-    post.set("body", "7帖子");
-    post.set("tags", ["3stTag", "2ndTag"]);
-    post.set("price", 200);
+        gameScore
+          .save(
+            null
+            //, { useMasterKey: true }
+          )
+          .then(
+            gameScore => {
+              // Execute any logic that should take place after the object is saved.
+              alert("New object created with objectId: " + gameScore.id);
+            },
+            error => {
+              // Execute any logic that should take place if the save fails.
+              // error is a Parse.Error with an error code and message.
+              alert(
+                "Failed to create new object, with error code: " + error.message
+              );
+            }
+          );
+      }
 
-    post.save().then(obj => {
-        console.log("Saved " + post.id);
+      function logout() {
+        var currentUser = Parse.User.current();
+        if (currentUser) {
+          console.log("Parse.User.current() have content, logout.");
+          console.dir(currentUser);
+          return Parse.User.logOut();
+        }
+      }
 
-    var Comment = Parse.Object.extend("Comment");
-    var comment = new Comment();
+      function currentUserPromise() {
+        var currentUser = Parse.User.current();
+        if (currentUser) {
+          console.log("Skip login. Parse.User.current() have content:");
+          console.dir(currentUser);
+          return Promise.resolve(currentUser);
+        } else {
+          // show the signup or login page
+          console.log("Parse.User.current() null, login ...");
+          return Parse.User.logInWith("local", {
+            authData: {
+              id: "2",
+              secret: "dyhao",
+              age: 15
+            }
+          });
+        }
+      }
 
-    comment.set("content", "Great post!!");
-    comment.set("parent", post);
-    comment.save();
+      function current() {
+        var currentUser = Parse.User.current();
+        if (!currentUser) {
+          alert("Parse.User.current() have nothing");
+          return;
+        }
 
+        Promise.resolve(currentUser)
+          .then(function(user) {
+            console.log("Parse.User.current() successfully!!!");
+            console.log("session token:" + user.getSessionToken());
+            console.log("User is:");
+            console.dir(user);
 
-    },
-    (obj, err) => {
-        console.log(err);
-    });
-}
+            user.set("username", "NameCurrent");
+            user.set("phoneNum", "111");
+            user.set("email", "x1x@yyy.zzz");
+            user.save();
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      }
 
+      function login() {
+        Parse.User.logInWith("local", {
+          authData: {
+            id: "4",
+            secret: "dyhao",
+            age: 18
+          }
+        })
+          .then(function(user) {
+            console.log("Login successfully!!!");
+            console.log("session token:" + user.getSessionToken());
+            console.log("User is:");
+            console.dir(user);
 
-function query1(){
-    var priceQuery = new Parse.Query("Post");
+            if(!user.get('nickname')){
+                console.log("New user, update nickname");
+                return user.save({nickname:'Sunny', avatar:'http://xx.com/a.jpg'});
+            }
 
-    priceQuery.greaterThan("price", 100);
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      }
 
-    priceQuery.find().then(rets => {
-        console.log(rets);
-    })
-}
+      
+      function write1() {
+        var Post = Parse.Object.extend("Post");
+        var post = new Post();
 
+        post.set("body", "7帖子");
+        post.set("tags", ["3stTag", "2ndTag"]);
+        post.set("price", 200);
 
-function query2(){
-    var prices = [100, 120, 230];
+        post.save().then(
+          obj => {
+            console.log("Saved " + post.id);
 
-    var priceQuery = new Parse.Query("Post");
+            var Comment = Parse.Object.extend("Comment");
+            var comment = new Comment();
 
-    priceQuery.containedIn("price", prices);
+            comment.set("content", "Great post!!");
+            comment.set("parent", post);
+            comment.save();
+          },
+          (obj, err) => {
+            console.log(err);
+          }
+        );
+      }
 
-    priceQuery.find().then(rets => {
-        console.log(rets);
-    })
-}
+      function query1() {
+        var priceQuery = new Parse.Query("Post");
 
+        priceQuery.greaterThan("price", 100);
 
-function query3(){
+        priceQuery.find().then(rets => {
+          console.log(rets);
+        });
+      }
 
-    var priceQuery = new Parse.Query("Post");
-    priceQuery.greaterThan("price", 100);
+      function query2() {
+        var prices = [100, 120, 230];
 
-    var q = new Parse.Query("Comment");
-    q.matchesKeyInQuery("parent", "id", priceQuery);
+        var priceQuery = new Parse.Query("Post");
 
+        priceQuery.containedIn("price", prices);
 
+        priceQuery.find().then(rets => {
+          console.log(rets);
+        });
+      }
 
+      function query3() {
+        var priceQuery = new Parse.Query("Post");
+        priceQuery.greaterThan("price", 100);
 
-    q.find().then(rets => {
-        console.log(rets);
-    })
-}
+        var q = new Parse.Query("Comment");
+        q.matchesKeyInQuery("parent", "id", priceQuery);
+
+        q.find().then(rets => {
+          console.log(rets);
+        });
+      }
     </script>
-</body>
-
+  </body>
 </html>

@@ -6,7 +6,105 @@
 
 https://www.youtube.com/watch?v=j0zDb9hVooQ&t=404s
 
+##
+
+```bash
+# start mongo
+
+
+# start parse server
+parse-server --appId peDapNoazCLWTBVQW6acxNgUI4ylTE2LqfrMnrHa --masterKey fRw4mlRZGUdMCVB8BRv4yb4oyZW165BTKuVWnTQL --databaseURI mongodb://localhost/test
+
+
+
+```
+## 使用MasterKey来写入对象
+```js
+//在parse初始化开头，加入：
+Parse.masterKey = 'fRw4mlRZGUdMCVB8BRv4yb4oyZW165BTKuVWnTQL';
+
+//写入时
+gameScore.set("cheatMode", false);
+gameScore.save(null, { useMasterKey: true }).then(...);
+
+```
+参见测试代码 index.html
+
+
 ## 内部实现
+
+### one2many的array实现
+
+```js
+
+// let's say we have four weapons
+var scimitar = {a:100, b:"gaha"};
+var plasmaRifle = {b:200, c:"hoho"};
+
+// stick the objects in an array
+var weapons = [scimitar, plasmaRifle];
+
+
+
+
+let user = new Parse.User();
+// 引用原有 user
+//user.id = "oiMxTxF2G3";
+
+// 新建 user
+user.set("username", "testUser");
+user.set("password", "my pass");
+user.set("email", "email@example.com");
+
+let players = [user];
+
+
+
+// store the weapons for the round
+var Round = Parse.Object.extend("GameRound");
+var round = new Round();
+
+round.set("name", "灭霸");
+round.set("weapons", weapons);
+round.set("players", players);
+
+round.save()
+```
+
+会添加 weapons 和 player两个字段，
+
+weapons部分，会在round对象中添加  weapons array类型对象，内部是 JSON字串，类如：
+```json
+
+[
+  {
+    "a": 100,
+    "b": "gaha"
+  },
+  {
+    "b": 200,
+    "c": "hoho"
+  }
+]
+```
+
+players部分 会添加  players array类型对象，内部是 JSON字串，如下：
+
+```json
+
+[
+  {
+    "__type": "Pointer",
+    "className": "_User",
+    "objectId": "oiMxTxF2G2"
+  }
+]
+
+```
+user是新的对象，那么还会在user表中添加相应用户。
+
+也可以通过设定 user.id = "oiMxTxF2G3" 来直接引用user对象，不过该id正确性不会被检查，就算没有也不会新建。
+
 
 
 ###  pointer实现
