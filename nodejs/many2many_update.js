@@ -26,7 +26,7 @@ async function start(){
     const querySpotId = 101;
     const query = new Parse.Query(Spot);
     query.equalTo("spotId", querySpotId);
-    query.include(["scenes.spots"]);    // 作为指针引用，这个必不可少
+    query.include(["scenes.spots"]);    // <----  重要：不仅引入 spot的scenes字段，还进一步引入后者的spots字段
 
 
     const spot = await query.first();   //由于唯一性 所以 直接用 first

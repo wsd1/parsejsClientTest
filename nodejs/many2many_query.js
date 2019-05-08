@@ -24,7 +24,7 @@ async function start(){
     const querySpotId = 101;
     const query = new Parse.Query(Spot);
     query.equalTo("spotId", querySpotId);
-    query.include("scenes");    // 作为指针引用，这个必不可少
+    query.include("scenes");    // 重要： 作为指针引用，这个必不可少
 
 
     const spot = await query.first();   //由于唯一性 所以 直接用 first
@@ -36,6 +36,8 @@ async function start(){
 
     let scenes = spot.get('scenes');
     console.log(`scenes: ${scenes.length} items`);
+    // 上面 include指令 会将 scenes字段的内容 也读回来
+    // 若没有include 只能知道 scenes的数量 但是没法提取对象
 
     for(var i = 0; i < scenes.length; i++){
         console.log(` --- [${i}] ---`);

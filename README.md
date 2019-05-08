@@ -72,8 +72,6 @@ var plasmaRifle = {b:200, c:"hoho"};
 var weapons = [scimitar, plasmaRifle];
 
 
-
-
 let user = new Parse.User();
 // 引用原有 user
 //user.id = "oiMxTxF2G3";
