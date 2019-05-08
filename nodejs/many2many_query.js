@@ -1,4 +1,4 @@
-let Parse = require("parse/node");
+const Parse = require("parse/node");
 
 Parse.initialize("peDapNoazCLWTBVQW6acxNgUI4ylTE2LqfrMnrHa");
 Parse.serverURL = "http://localhost:1337/parse";

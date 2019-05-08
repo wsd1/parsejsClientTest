@@ -1,4 +1,4 @@
-let Parse = require("parse/node");
+const Parse = require("parse/node");
 
 Parse.initialize("peDapNoazCLWTBVQW6acxNgUI4ylTE2LqfrMnrHa");
 Parse.serverURL = "http://localhost:1337/parse";
@@ -48,38 +48,25 @@ async function start(){
     let scene1 = new Scene();
     let scene2 = new Scene();
 
-    spot1.set("spotId", biggestSpotId + 1);
-    spot1.set("marker", 24);
-    spot1.set("class", "switch_v0.1");
     //spot1.set("ctrlrId", 10003);
-    await spot1.save();
+    await spot1.save({spotId: biggestSpotId + 1, marker: 24, className: "switch_v0.1"});
     console.log("spot1 saved " + spot1.id);
     
-    spot2.set("spotId", biggestSpotId + 2);
-    spot2.set("marker", 25);
-    spot2.set("class", "slider_v0.1");
     //spot2.set("ctrlrId", 10003);
-    await spot2.save();
+    await spot1.save({spotId: biggestSpotId + 2, marker: 25, className: "slider_v0.1"});
     console.log("spot2 saved " + spot2.id);
 
     //注意 得先存储 spot，之后 scene才能引用
 
-    scene1.set("sceneId", biggestSceneId + 1);
-    scene1.set("class", "robotSpace_v0.1");
+
     //scene1.set("ctrlrId", 10005);
-    scene1.set("spots", [spot1, spot2]);
-
-    scene2.set("sceneId", biggestSceneId + 2);
-    scene2.set("class", "robotSpace_v0.1");
-    //scene2.set("ctrlrId", 10006);
-    scene2.set("spots", [spot1]);
-
-    await scene1.save();
+    await scene1.save({sceneId: biggestSceneId + 1, className: "robotSpace_v0.1", spots: [spot1, spot2] });
     console.log("scene1 saved " + scene1.id);
     
-    await scene2.save();
+    //scene2.set("ctrlrId", 10006);
+    await scene2.save({sceneId: biggestSceneId + 2, className: "robotSpace_v0.2", spots: [spot1] });
     console.log("scene2 saved " + scene2.id);
-    
+
     // scene存好了，才能更新 spot 对scene的引用
 
     spot1.set("scenes", [scene1, scene2]);
