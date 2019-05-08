@@ -18,7 +18,10 @@ parse-server --appId peDapNoazCLWTBVQW6acxNgUI4ylTE2LqfrMnrHa --masterKey fRw4ml
 
 
 ```
-## 使用MasterKey来写入对象
+## 使用技巧
+
+
+### 使用MasterKey来写入对象
 ```js
 //在parse初始化开头，加入：
 Parse.masterKey = 'fRw4mlRZGUdMCVB8BRv4yb4oyZW165BTKuVWnTQL';
@@ -31,7 +34,31 @@ gameScore.save(null, { useMasterKey: true }).then(...);
 参见测试代码 index.html
 
 
-## 内部实现
+### 查询最大值
+
+```js
+let Spot = Parse.Object.extend("appSpot_spot");
+
+const query = new Parse.Query(Spot);
+query.descending("spotId");
+return await query.first();
+...
+//见 query_biggest.js
+```
+
+### 多对多关系 处理示例 
+参见 代码 nodejs/many2many_xxx.js
+
+本示例演示 spot和scene的关系，如需要测试请 按照 create、query和update的顺序执行；
+
+
+值得一提的是 最后update的处理，充分利用了 include 指令，将感兴趣的spot相关的 scene和这些scene相关的spot都读取回来。通过遍历，删除相关scene中对目标spot的引用，并存储回去，最后更新spot中的scenes，也存储回去。
+
+
+
+
+
+## 内部实现 解析
 
 ### one2many的array实现
 
